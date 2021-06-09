@@ -1,0 +1,27 @@
+set -ex
+
+export MAVEN_OPTS="-Xmx1024m"
+
+MVN_ARGS="-Phadoop-3.0 "
+MVN_ARGS+="-Phadoop.profile=3.0 "
+MVN_ARGS+="-Dhadoop-three.version=${HADOOP_VERSION} "
+MVN_ARGS+="-DskipTests "
+MVN_ARGS+="-Dcheckstyle.skip=true "
+MVN_ARGS+="-Dmaven.install.skip=true "
+
+
+# We don't generate the site right now, which means the rpm has no docs embedded.
+# I don't think we use the docs, and generating them almost triples the build time.
+# It is required to first install before generating the site, otherwise site downloads the artifact
+# from nexus. Either way, using the blazar m2 repository cache means that this install or download
+# would mess with the cache. So for now we prioritize performance over these unused docs. If we 
+# want to add it back, we will need to disable the m2 cache.
+#mvn ${MVN_ARGS} ${MAVEN_ADDITIONAL} clean install "$@"
+#mvn ${MVN_ARGS} ${MAVEN_ADDITIONAL} site "$@"
+
+mvn ${MVN_ARGS} ${MAVEN_ADDITIONAL} clean package assembly:single "$@"
+
+rm -rf build
+mkdir build
+tar -C build --strip-components=1 -xzf hbase-assembly/target/hbase-${HBASE_VERSION}-bin.tar.gz
+tar -C build --strip-components=1 -xzf hbase-assembly/target/hbase-${HBASE_VERSION}-client-bin.tar.gz

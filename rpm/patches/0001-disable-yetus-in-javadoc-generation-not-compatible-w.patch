@@ -1,0 +1,56 @@
+From fec2cb168e28622dbd20a6b827294177c9afba84 Mon Sep 17 00:00:00 2001
+From: Bryan Beaudreault <bbeaudreault@hubspot.com>
+Date: Tue, 8 Jun 2021 10:08:39 -0400
+Subject: [PATCH] disable yetus in javadoc generation -- it's not compatible with java 11. 
+
+See https://issues.apache.org/jira/browse/HBASE-25983. We can likely remove this patch once that is fixed.
+
+---
+ pom.xml | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/pom.xml b/pom.xml
+index f60e5928a7..47ede41bc1 100755
+--- a/pom.xml
++++ b/pom.xml
+@@ -4111,6 +4111,10 @@
+               <report>aggregate-no-fork</report>
+             </reports>
+             <configuration>
++              <!--
++
++              this yetus doclet is not compatible with java11
++
+               <doclet>
+                 org.apache.yetus.audience.tools.IncludePublicAnnotationsStandardDoclet
+               </doclet>
+@@ -4119,6 +4123,7 @@
+                 <artifactId>audience-annotations</artifactId>
+                 <version>${audience-annotations.version}</version>
+               </docletArtifact>
++              -->
+               <useStandardDocletOptions>true</useStandardDocletOptions>
+               <destDir>apidocs</destDir>
+               <name>User API</name>
+@@ -4171,6 +4176,10 @@
+               <report>test-aggregate-no-fork</report>
+             </reports>
+             <configuration>
++              <!--
++
++              this yetus doclet is not compatible with java11
++
+               <doclet>
+                 org.apache.yetus.audience.tools.IncludePublicAnnotationsStandardDoclet
+               </doclet>
+@@ -4179,6 +4188,7 @@
+                 <artifactId>audience-annotations</artifactId>
+                 <version>${audience-annotations.version}</version>
+               </docletArtifact>
++              -->
+               <useStandardDocletOptions>true</useStandardDocletOptions>
+               <destDir>testapidocs</destDir>
+               <name>User API</name>
+-- 
+2.30.1 (Apple Git-130)
+

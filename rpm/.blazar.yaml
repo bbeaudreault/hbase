@@ -1,0 +1,77 @@
+buildType: MAVEN
+
+buildpack:
+  host: git.hubteam.com
+  organization: HubSpot
+  repository: rpm_builders
+  branch: master
+
+buildDeps:
+  - hs-build-tools
+  - jdk11
+  - maven3
+
+# unlike normal maven builds, we want to use our own m2 because the build process involves
+# mvn install. we don't want these installed jars to mess up the global m2 cache.
+cache:
+  - /root/.m2/repository
+
+env:
+  # Our main branch will upload to 6/hs-hbase.
+  # All other branches (including staging) will go to 6/hs-hbase-develop.
+  MAIN_YUM_REPO: "6_hs-hbase"
+  DEVELOP_YUM_REPO: "6_hs-hbase-develop"
+
+  # These are used for deciding the rpm version and yum repo
+  # We special case staging because version names cannot have dashes in them
+  MAIN_BRANCH: "hubspot-2.x"
+  STAGING_BRANCH: "hubspot-2.x-staging"
+
+  # This will be updated automatically by the "Set yum repo and package version" step below
+  YUM_REPO_UPLOAD_OVERRIDE: "UPDATE ME"
+
+  # The entry point script for the rpm build
+  RPM_BUILD_COMMAND: "./build.sh"
+
+  JAVA_HOME: "/opt/build-deps/jdk11"
+
+  # versions necessary for building
+  HBASE_VERSION: 2.4.3
+  HADOOP_VERSION: 3.2.2
+
+before:
+  - description: Set yum repo and package version
+    commands:
+      - |
+          # We want our resulting version to follow this schema:
+          # master branch: {hbase_version}-hs.{build_number}.el6
+          # staging branch: {hbase_version}-hs~staging.{build_number}.el6
+          # other branches: {hbase_version}-hs~{branch_name}.{build_number}.el6, where branch_name substitutes underscore for non-alpha-numeric characters
+
+          release_prefix="hs"
+
+          if [ "$GIT_BRANCH" = "$MAIN_BRANCH" ]; then
+              repo=$MAIN_YUM_REPO
+          elif [[ "$GIT_BRANCH" = "$STAGING_BRANCH" ]]; then
+              release_prefix="${release_prefix}~staging"
+              repo=$DEVELOP_YUM_REPO
+          else
+              release_prefix="${release_prefix}~${GIT_BRANCH//[^[:alnum:]]/_}"
+              repo=$DEVELOP_YUM_REPO
+          fi
+
+          release="${release_prefix}.${BUILD_NUMBER}"
+
+          # exports in this rc file are available in all steps
+          echo "export PKG_RELEASE=$release" >> $BUILD_COMMAND_RC_FILE
+          echo "export YUM_REPO_UPLOAD_OVERRIDE=$repo" >> $BUILD_COMMAND_RC_FILE
+
+          echo "Will upload package with release $release to $repo"
+
+buildResources:
+  cpus: 8
+  memoryMb: 20480
+
+stepActivation:
+  uploadRpms:
+    branchRegexes: ['.*']
