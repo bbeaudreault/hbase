@@ -1,0 +1,43 @@
+From 0e81edbc5284e999c65809d963c4916d859f03b7 Mon Sep 17 00:00:00 2001
+From: Bryan Beaudreault <bbeaudreault@hubspot.com>
+Date: Wed, 9 Jun 2021 09:29:25 -0400
+Subject: [PATCH 2/2] Add hubspot-generated build.json files to shading
+ invariant allow list
+
+---
+ .../src/test/resources/ensure-jars-have-correct-contents.sh     | 2 +-
+ .../src/test/resources/ensure-jars-have-correct-contents.sh     | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+ mode change 100644 => 100755 hbase-shaded/hbase-shaded-with-hadoop-check-invariants/src/test/resources/ensure-jars-have-correct-contents.sh
+
+diff --git a/hbase-shaded/hbase-shaded-check-invariants/src/test/resources/ensure-jars-have-correct-contents.sh b/hbase-shaded/hbase-shaded-check-invariants/src/test/resources/ensure-jars-have-correct-contents.sh
+index 3e0d73fea6..b8a2d6cad4 100644
+--- a/hbase-shaded/hbase-shaded-check-invariants/src/test/resources/ensure-jars-have-correct-contents.sh
++++ b/hbase-shaded/hbase-shaded-check-invariants/src/test/resources/ensure-jars-have-correct-contents.sh
+@@ -88,7 +88,7 @@ allowed_expr+="|^PropertyList-1.0.dtd$"
+ # Shaded jetty resources
+ allowed_expr+="|^about.html$"
+ allowed_expr+="|^jetty-dir.css$"
+-
++allowed_expr+="|^build_info/(org.apache.hbase_hbase-[^.]+.build.json)?$"
+ 
+ if [ -n "${allow_hadoop}" ]; then
+   #   * classes in packages that start with org.apache.hadoop, which by
+diff --git a/hbase-shaded/hbase-shaded-with-hadoop-check-invariants/src/test/resources/ensure-jars-have-correct-contents.sh b/hbase-shaded/hbase-shaded-with-hadoop-check-invariants/src/test/resources/ensure-jars-have-correct-contents.sh
+old mode 100644
+new mode 100755
+index 3e0d73fea6..b8a2d6cad4
+--- a/hbase-shaded/hbase-shaded-with-hadoop-check-invariants/src/test/resources/ensure-jars-have-correct-contents.sh
++++ b/hbase-shaded/hbase-shaded-with-hadoop-check-invariants/src/test/resources/ensure-jars-have-correct-contents.sh
+@@ -88,7 +88,7 @@ allowed_expr+="|^PropertyList-1.0.dtd$"
+ # Shaded jetty resources
+ allowed_expr+="|^about.html$"
+ allowed_expr+="|^jetty-dir.css$"
+-
++allowed_expr+="|^build_info/(org.apache.hbase_hbase-[^.]+.build.json)?$"
+ 
+ if [ -n "${allow_hadoop}" ]; then
+   #   * classes in packages that start with org.apache.hadoop, which by
+-- 
+2.30.1 (Apple Git-130)
+
