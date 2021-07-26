@@ -3869,8 +3869,7 @@ public class HRegion implements HeapSize, PropagatingConfigurationObserver, Regi
             Result result;
             if (returnResults) {
               // convert duplicate increment/append to get
-              List<Cell> results = region.get(toGet(mutation), false, nonceGroup, nonce);
-              result = Result.create(results);
+              result = region.get(toGet(mutation), false, nonceGroup, nonce);
             } else {
               result = Result.EMPTY_RESULT;
             }
@@ -8191,9 +8190,7 @@ public class HRegion implements HeapSize, PropagatingConfigurationObserver, Regi
   @Override
   public Result get(final Get get) throws IOException {
     prepareGet(get);
-    List<Cell> results = get(get, true);
-    boolean stale = this.getRegionInfo().getReplicaId() != 0;
-    return Result.create(results, get.isCheckExistenceOnly() ? !results.isEmpty() : null, stale);
+    return get(get, true, HConstants.NO_NONCE, HConstants.NO_NONCE);
   }
 
   void prepareGet(final Get get) throws IOException {
@@ -8212,11 +8209,26 @@ public class HRegion implements HeapSize, PropagatingConfigurationObserver, Regi
 
   @Override
   public List<Cell> get(Get get, boolean withCoprocessor) throws IOException {
-    return get(get, withCoprocessor, HConstants.NO_NONCE, HConstants.NO_NONCE);
+    ScannerContext scannerContext = ScannerContext.newBuilder()
+      .setSizeLimit(LimitScope.BETWEEN_CELLS, get.getMaxResultSize(), get.getMaxResultSize())
+      .build();
+    return get(get, scannerContext, withCoprocessor, HConstants.NO_NONCE, HConstants.NO_NONCE);
   }
 
-  public List<Cell> get(Get get, boolean withCoprocessor, long nonceGroup, long nonce)
-      throws IOException {
+  private Result get(Get get, boolean withCoprocessor, long nonceGroup, long nonce)
+    throws IOException {
+    ScannerContext scannerContext = ScannerContext.newBuilder()
+      .setSizeLimit(LimitScope.BETWEEN_CELLS, get.getMaxResultSize(), get.getMaxResultSize())
+      .build();
+
+    List<Cell> results = get(get, scannerContext, withCoprocessor, nonceGroup, nonce);
+    boolean stale = this.getRegionInfo().getReplicaId() != 0;
+    return Result.create(results, get.isCheckExistenceOnly() ? !results.isEmpty() : null, stale,
+      scannerContext.mayHaveMoreCellsInRow());
+  }
+
+  private List<Cell> get(Get get, ScannerContext scannerContext, boolean withCoprocessor,
+    long nonceGroup, long nonce) throws IOException {
     List<Cell> results = new ArrayList<>();
     long before =  EnvironmentEdgeManager.currentTime();
 
@@ -8234,7 +8246,7 @@ public class HRegion implements HeapSize, PropagatingConfigurationObserver, Regi
     RegionScanner scanner = null;
     try {
       scanner = getScanner(scan, null, nonceGroup, nonce);
-      scanner.next(results);
+      scanner.next(results, scannerContext);
     } finally {
       if (scanner != null)
         scanner.close();

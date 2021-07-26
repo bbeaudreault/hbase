@@ -1547,7 +1547,7 @@ public final class ProtobufUtil {
 
     return (cells == null || cells.isEmpty())
         ? (proto.getStale() ? EMPTY_RESULT_STALE : EMPTY_RESULT)
-        : Result.create(cells, null, proto.getStale());
+        : Result.create(cells, null, proto.getStale(), proto.getPartial());
   }
 
 
