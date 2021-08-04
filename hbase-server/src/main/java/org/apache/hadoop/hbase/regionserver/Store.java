@@ -249,6 +249,8 @@ public interface Store {
    */
   boolean hasTooManyStoreFiles();
 
+  void reopenNewlyLocalStoreFiles() throws IOException;
+
   /**
    * Checks the underlying store files, and opens the files that have not been opened, and removes
    * the store file readers for store files no longer available. Mainly used by secondary region
