@@ -59,6 +59,7 @@ final class RSGroupProtobufUtil {
       .setRSGroupName(groupName)
       .setDryRun(request.isDryRun())
       .setIgnoreRit(request.isIgnoreRegionsInTransition())
+      .setReloadConfigs(request.isReloadConfigs())
       .build();
   }
 
@@ -66,6 +67,7 @@ final class RSGroupProtobufUtil {
     return BalanceRequest.newBuilder()
       .setDryRun(request.hasDryRun() && request.getDryRun())
       .setIgnoreRegionsInTransition(request.hasIgnoreRit() && request.getIgnoreRit())
+      .setReloadConfigs(request.hasReloadConfigs() && request.getReloadConfigs())
       .build();
   }
 

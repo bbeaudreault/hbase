@@ -542,6 +542,10 @@ public class RSGroupAdminServer implements RSGroupAdmin {
         return responseBuilder.build();
       }
 
+      if (request.isReloadConfigs()) {
+        balancer.reloadConfiguration();
+      }
+
       //We balance per group instead of per table
       Map<TableName, Map<ServerName, List<RegionInfo>>> assignmentsByTable =
           getRSGroupAssignmentsByTable(master.getTableStateManager(), groupName);

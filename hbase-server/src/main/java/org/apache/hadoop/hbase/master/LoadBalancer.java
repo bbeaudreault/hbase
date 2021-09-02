@@ -197,4 +197,9 @@ public interface LoadBalancer extends Stoppable, ConfigurationObserver {
   static boolean isMasterCanHostUserRegions(Configuration conf) {
     return isTablesOnMaster(conf) && !isSystemTablesOnlyOnMaster(conf);
   }
+
+  /**
+   * Forces a reload of the underlying Configuration for the balancer
+   */
+  void reloadConfiguration();
 }

@@ -566,7 +566,7 @@ public abstract class BaseLoadBalancer implements LoadBalancer {
       regionFinder = null;
     }
 
-    this.isByTable = conf.getBoolean(HConstants.HBASE_MASTER_LOADBALANCE_BYTABLE, isByTable);
+    this.isByTable = conf.getBoolean(HConstants.HBASE_MASTER_LOADBALANCE_BYTABLE, HConstants.DEFAULT_HBASE_MASTER_LOADBALANCE_BYTABLE);
     LOG.info("slop={}, systemTablesOnMaster={}", this.slop, this.onlySystemTablesOnMaster);
   }
 
@@ -780,5 +780,15 @@ public abstract class BaseLoadBalancer implements LoadBalancer {
   @Override
   public synchronized void onConfigurationChange(Configuration conf) {
     loadConf(conf);
+  }
+
+  @Override
+  public void reloadConfiguration() {
+    LOG.info("Reloading balancer configs");
+    // We clone and reload the clone because the original conf may be used in other
+    // non-balancer contexts. We only want to reload configs for the balancer.
+    Configuration conf = new Configuration(getConf());
+    conf.reloadConfiguration();
+    onConfigurationChange(conf);
   }
 }

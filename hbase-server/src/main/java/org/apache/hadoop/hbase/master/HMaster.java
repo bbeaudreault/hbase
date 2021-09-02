@@ -1858,6 +1858,10 @@ public class HMaster extends HRegionServer implements MasterServices {
         serverMap.keySet().removeAll(this.serverManager.getDrainingServersList());
       }
 
+      if (request.isReloadConfigs()) {
+        this.balancer.reloadConfiguration();
+      }
+
       //Give the balancer the current cluster state.
       this.balancer.updateClusterMetrics(getClusterMetricsWithoutCoprocessor());
 

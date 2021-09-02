@@ -115,6 +115,11 @@ public class MaintenanceLoadBalancer implements LoadBalancer {
   }
 
   @Override
+  public void reloadConfiguration() {
+
+  }
+
+  @Override
   public void postMasterStartupInitialize() {
   }
 

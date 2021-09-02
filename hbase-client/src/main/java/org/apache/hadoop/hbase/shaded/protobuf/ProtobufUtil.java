@@ -3759,6 +3759,7 @@ public final class ProtobufUtil {
     return MasterProtos.BalanceRequest.newBuilder()
       .setDryRun(request.isDryRun())
       .setIgnoreRit(request.isIgnoreRegionsInTransition())
+      .setReloadConfigs(request.isReloadConfigs())
       .build();
   }
 
@@ -3766,6 +3767,7 @@ public final class ProtobufUtil {
     return BalanceRequest.newBuilder()
       .setDryRun(request.hasDryRun() && request.getDryRun())
       .setIgnoreRegionsInTransition(request.hasIgnoreRit() && request.getIgnoreRit())
+      .setReloadConfigs(request.hasReloadConfigs() && request.getReloadConfigs())
       .build();
   }
 

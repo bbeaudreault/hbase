@@ -18,6 +18,7 @@
  */
 package org.apache.hadoop.hbase.client;
 
+import org.apache.hadoop.hbase.ServerName;
 import org.apache.yetus.audience.InterfaceAudience;
 
 /**
@@ -34,11 +35,12 @@ public final class BalanceRequest {
   public final static class Builder {
     private boolean dryRun = false;
     private boolean ignoreRegionsInTransition = false;
+    private boolean reloadConfigs = false;
 
     private Builder() {}
 
     /**
-     * Creates a BalancerRequest which runs the balancer in dryRun mode.
+     * Updates the BalanceRequest to cause the balancer to run in dryRun mode.
      * In this mode, the balancer will try to find a plan but WILL NOT
      * execute any region moves or call any coprocessors.
      *
@@ -55,7 +57,7 @@ public final class BalanceRequest {
     }
 
     /**
-     * Creates a BalancerRequest to cause the balancer to run even if there
+     * Updates the BalanceRequest to cause the balancer to run even if there
      * are regions in transition.
      *
      * WARNING: Advanced usage only, this could cause more issues than it fixes.
@@ -66,10 +68,21 @@ public final class BalanceRequest {
     }
 
     /**
+     * Updates the BalanceRequest to cause the balancer to reload configuration from
+     * hbase-site.xml before running. The newly loaded changes will remain in effect
+     * for the lifetime of the active HMaster or until reloaded again (through
+     * {@link #setReloadConfigs(boolean)} or {@link Admin#updateConfiguration(ServerName)}).
+     */
+    public Builder setReloadConfigs(boolean reloadConfigs) {
+      this.reloadConfigs = reloadConfigs;
+      return this;
+    }
+
+    /**
      * Build the {@link BalanceRequest}
      */
     public BalanceRequest build() {
-      return new BalanceRequest(dryRun, ignoreRegionsInTransition);
+      return new BalanceRequest(dryRun, ignoreRegionsInTransition, reloadConfigs);
     }
   }
 
@@ -90,10 +103,12 @@ public final class BalanceRequest {
 
   private final boolean dryRun;
   private final boolean ignoreRegionsInTransition;
+  private final boolean reloadConfigs;
 
-  private BalanceRequest(boolean dryRun, boolean ignoreRegionsInTransition) {
+  private BalanceRequest(boolean dryRun, boolean ignoreRegionsInTransition, boolean reloadConfigs) {
     this.dryRun = dryRun;
     this.ignoreRegionsInTransition = ignoreRegionsInTransition;
+    this.reloadConfigs = reloadConfigs;
   }
 
   /**
@@ -110,5 +125,15 @@ public final class BalanceRequest {
    */
   public boolean isIgnoreRegionsInTransition() {
     return ignoreRegionsInTransition;
+  }
+
+  /**
+   * Returns true if the balancer should reload configuration from hbase-site.xml before running.
+   * The newly loaded changes will remain in effect  for the lifetime of the active HMaster or
+   * until reloaded again (through {@link Builder#setReloadConfigs(boolean)} or
+   * {@link Admin#updateConfiguration(ServerName)}).
+   */
+  public boolean isReloadConfigs() {
+    return reloadConfigs;
   }
 }

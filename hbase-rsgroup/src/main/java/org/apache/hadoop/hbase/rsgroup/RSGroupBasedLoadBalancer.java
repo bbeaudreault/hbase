@@ -392,6 +392,11 @@ public class RSGroupBasedLoadBalancer implements RSGroupableBalancer {
   }
 
   @Override
+  public void reloadConfiguration() {
+    internalBalancer.reloadConfiguration();
+  }
+
+  @Override
   public void stop(String why) {
     internalBalancer.stop(why);
   }
